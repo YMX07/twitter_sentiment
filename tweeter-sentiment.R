@@ -13,11 +13,11 @@ library(httpuv)
 library(httr)
 library("openssl")
 
-consumerKey <-"0r6QHjJEOLSl9IkU3k7py2cYn"
-consumerSecret <-"gySrxbuX6LhCAogye95S2HFlE2YL2fZY0s1axFBEYD17yX0PG8"
+consumerKey <-"00"
+consumerSecret <-"00"
 
-access_token <- "1252120769259343872-v1NS9Qk7riTjzV87PT1Jjg56lPwSih"
-access_secret<-"w07qTU363fmoErkLY4W8lFPJAHjDN78Ao5DcbUDVy9ajm"
+access_token <- "00ih"
+access_secret<-"w0000000m"
 
 oauth_endpoint(authorize = 'https://api.twitter.com/oauth',
                access = 'https://api.twitter.com/oauth/access_token')

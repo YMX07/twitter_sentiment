@@ -1,5 +1,3 @@
-library(syuzhet)
-library(ggplot2)
 library(twitteR)
 library(ROAuth)
 library(dplyr)
@@ -13,7 +11,7 @@ library(httpuv)
 library(httr)
 library("openssl")
 
-consumerKey <-"0r6QHjJEOLSl9IkU3k7py2cYn" 
+consumerKey <-"0r6QHjJEOLSl9IkU3k7py2cYn"
 consumerSecret <-"gySrxbuX6LhCAogye95S2HFlE2YL2fZY0s1axFBEYD17yX0PG8"
 
 access_token <- "1252120769259343872-v1NS9Qk7riTjzV87PT1Jjg56lPwSih"
@@ -39,8 +37,7 @@ setup_twitter_oauth(consumer_key = consumerKey, consumer_secret = consumerSecret
 origop <- options("httr_oauth_cache")
 options(httr_oauth_cache = TRUE)
 
-################################################################################################################################################################"
-################################################################################################################################################################"
+
 traders <- list("@CryptoWealthL","@GateCryptos","@eljaboom","@BusterTrades", "@crypto_thai", "@CryptoSpider1", "@AlgodTrading", 
                 "@rickytheirish", "@Rager","@KILLSHOTCRYPTO","@damskotrades",
                 "@CRYPT0HULK", "@Altcointraders_","@TheCryptoDog","crypto_birb","@cryptodude999", "@Cryptanzee", "@CryptoRevoltFR",
@@ -65,30 +62,54 @@ for(trader in traders){
   Coins <- do.call("rbind",lapply(str_extract_all(string = traders.tweets.DF$text, pattern = "^\\$[a-zA-Z]*"),as.list))
 }
 
-################################################################################################################################################################"
-################################################################################################################################################################"
+coin_list <- lapply(Coins,tolower)
+comptageCoins <- as.data.frame(table(unlist(coin_list)))
+Goldendf <- comptageCoins[order(-comptageCoins$Freq),]
+GoldenList <- Goldendf$Var1
 
-# Converting tweets to ASCII to trackle strange characters
-tweets <- iconv( traders.tweets.DF, from="UTF-8", to="ASCII", sub="")
 
-# removing retweets, in case needed 
-tweets <-gsub("(RT|via)((?:\\b\\w*@\\w+)+)","",tweets)
+list_coins_to_tweet = ""
+for(coin in GoldenList){
 
-# removing mentions, in case needed
-tweets <-gsub("@\\w+","",tweets)
-ew_sentiment<-get_nrc_sentiment((tweets))
-sentimentscores<-data.frame(colSums(ew_sentiment[,]))
-names(sentimentscores) <- "Score"
-sentimentscores <- cbind("sentiment"=rownames(sentimentscores),sentimentscores)
-rownames(sentimentscores) <- NULL
+  if(coin != "$"){
 
-sentimentscores <- sentimentscores / sqrt(sum(sentimentscores^2)) 
+    if(list_coins_to_tweet==""){
+      list_coins_to_tweet <- paste(list_coins_to_tweet, coin, sep = "")
+    }else{
+      list_coins_to_tweet <- paste(list_coins_to_tweet, coin, sep = ";")
+    }
+  }
+}
 
-ggplot(data=sentimentscores,aes(x=sentiment,y=Score))+
-  geom_bar(aes(fill=sentiment),stat = "identity")+
-  theme(legend.position="none")+
-  xlab("Sentiments")+ylab("Scores")+
-  ggtitle("Traders sentiment based on scores")+
-  theme_minimal()
 
+#TOP TEN ONLY
+TOP10 = ""
+Msg_to_Tweet = ""
+i <- 0
+for(coin in GoldenList){
+  if(i<10){
+    if(coin != "$"){
+      if(TOP10==""){
+        TOP10 <- paste(TOP10, coin, sep = "")
+        i<-i-1
+      }else{
+        TOP10 <- paste(TOP10, coin, sep = " / ")
+      }
+    }
+  }
+  i<-i+1
+}
+
+Msg_to_Tweet<-paste(Msg_to_Tweet, "[crypto:list] ", sep = "")
+Msg_to_Tweet<-paste(Msg_to_Tweet, TOP10, sep = "")
+Msg_to_Tweet <- paste(Msg_to_Tweet, "", sep = " / ")
+Msg_to_Tweet<-paste(Msg_to_Tweet,"#cryptolist ", sep = "")
+Msg_to_Tweet<-paste(Msg_to_Tweet,"/ #crypto", sep = "")
+tw <- updateStatus(Msg_to_Tweet)
+
+for(coin in Goldendf$Var1){
+  if(coin != "$"){
+    print(coin)
+  } 
+}
 
